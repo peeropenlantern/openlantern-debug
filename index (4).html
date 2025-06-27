@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Open Lantern Session Debug</title>
+  <style>
+    body { font-family: monospace; background-color: #f0f0f0; padding: 2em; }
+    pre { background: white; padding: 1em; border-radius: 8px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+  </style>
+</head>
+<body>
+  <h1>🔍 Open Lantern Session Debug</h1>
+  <pre id="output">Loading...</pre>
+  <script>
+    const output = document.getElementById("output");
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get("session");
+
+    output.textContent = `Session ID from URL: ${sessionId}\n\nFetching GitHub data...`;
+
+    fetch("https://raw.githubusercontent.com/peeropenlantern/openlantern-data/main/pinlog_data.json")
+      .then(response => {
+        if (!response.ok) throw new Error("Failed to fetch JSON: " + response.status);
+        return response.json();
+      })
+      .then(data => {
+        const sessionIds = data.map(entry => entry.session_id);
+        const matched = data.find(entry => entry.session_id === sessionId);
+        output.textContent = `Session ID from URL: ${sessionId}\n\nSession IDs in file:\n${sessionIds.join("\n")}\n\nMatch Found: ${matched ? "YES" : "NO"}`;
+      })
+      .catch(error => {
+        output.textContent = `Session ID from URL: ${sessionId}\n\n❌ ERROR: ${error.message}`;
+      });
+  </script>
+</body>
+</html>
